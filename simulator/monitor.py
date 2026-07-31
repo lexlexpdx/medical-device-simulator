@@ -4,41 +4,67 @@
 
 # Imports
 import random
+from re import S
 import time
 import json
 import paho.mqtt.client as mqtt
 
-# Set up a broker and client
+
+# Broker and client Constants
 BROKER = "localhost"
 PORT = 1883
+
+class PatientState():
+
+    def __init__(self):
+        self.heart_rate = 75
+        self.spo2 = 98
+        self.systolic_bp = 120
+        self.diastolic_bp = 80
+
+    def update(self):
+        self.heart_rate += random.gauss(0, 1)
+        self.spo2 += random.gauss(0, 0.5) 
+        self.systolic_bp += random.gauss(0, 1)
+        self.diastolic_bp += random.gauss(0, 0.05)
+    
+        self.heart_rate = max(40, min(self.heart_rate, 180))
+        self.spo2 = max(70, min(self.spo2, 100))
+
+    def get_vitals(self):
+        
+        return {
+            "heart_rate": round(self.heart_rate),
+            "spo2": round(self.spo2),
+            "blood_pressure": {
+                "systolic_bp": round(self.systolic_bp),
+                "diastolic_bp": round(self.diastolic_bp)
+            }
+        }
+
+patient = PatientState()
 
 # Create a client object and connect to the MQTT broker via TCP
 client = mqtt.Client()
 client.connect(BROKER, PORT)
 
-def generate_vitals():
-    """
-    This function returns a python dictionary that servces as a vital sign snapshot 
-    for a single patient
-
-    Returns:
-        Python Dictionary: Patient vitals snapshot
-    """
-    
-    return {
-        "device id": "monitor-001",
-        "patient-id": "patient-001",
-        "heart_rate": random.randint(50, 110),
-        "spo2": random.randint(94, 100),
-        "systolic_bp": random.randint(80, 120),
-        "diastolic_bp": random.randint(60, 90),
-        "timestamp": time.time()
-    }
-
-# Runs indefinitely
+# Run loop
 while True:
 
-    data = generate_vitals()
+    patient.update()
+
+    # Use dictionary unpacking into the data dictionary
+    data = {
+        "device": {
+            "id": "monitor-001",
+            "type": "patient-monitor"
+        },
+        "patient": {
+            "id": "patient-001"
+        },
+        "timestamp": time.time(),
+        "vitals": patient.get_vitals()
+    }
 
     # Serialize as a JSON file
     # Sends to MQTT broker
@@ -47,6 +73,6 @@ while True:
         json.dumps(data)
     )
 
-    print(data)
+    print(json.dumps(data, indent=2))
 
     time.sleep(1)
