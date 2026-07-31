@@ -4,7 +4,6 @@
 
 # Imports
 import random
-from re import S
 import time
 import json
 import paho.mqtt.client as mqtt
