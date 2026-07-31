@@ -40,6 +40,8 @@ while True:
 
     data = generate_vitals()
 
+    # Serialize as a JSON file
+    # Sends to MQTT broker
     client.publish(
         "hospital/patient/telemetry",
         json.dumps(data)
