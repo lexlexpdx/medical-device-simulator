@@ -2,8 +2,20 @@
 # Author: Lex Albrandt
 
 services:
+  # MQTT service
   mqtt:
     image: eclipse-mosquitto:2
     container_name: mqtt
     ports:
       - "1883:1883"
+
+  # Postgres Service
+  postgres:
+    image: postgres:17
+    container_name: telemetry-db
+    environment:
+      POSTGRES_USER: telemetry
+      POSTGRES_PASSWORD: telemtrypass
+      POSTGRES_DB: medical_device
+    ports:
+      - "5432:5432"
