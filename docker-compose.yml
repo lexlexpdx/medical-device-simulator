@@ -15,7 +15,9 @@ services:
     container_name: telemetry-db
     environment:
       POSTGRES_USER: telemetry
-      POSTGRES_PASSWORD: telemtrypass
+      POSTGRES_PASSWORD: telemetrypass
       POSTGRES_DB: medical_device
     ports:
       - "5432:5432"
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
